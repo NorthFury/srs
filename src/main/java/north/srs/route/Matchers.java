@@ -90,6 +90,20 @@ public final class Matchers {
         }
 
         @Override
+        public int hashCode() {
+            return ~matcher.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Matchers.NotMatcher) {
+                Matchers.NotMatcher that = (Matchers.NotMatcher) obj;
+                return matcher.equals(that.matcher);
+            }
+            return false;
+        }
+
+        @Override
         public String toString() {
             return "Not(" + matcher.toString() + ")";
         }
