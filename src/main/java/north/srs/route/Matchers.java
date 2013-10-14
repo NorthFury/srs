@@ -93,7 +93,6 @@ public final class Matchers {
         public String toString() {
             return "Not(" + matcher.toString() + ")";
         }
-        private static final long serialVersionUID = 0;
     }
 
     /**
@@ -121,7 +120,6 @@ public final class Matchers {
         public String toString() {
             return "And(" + commaJoin(matchers) + ")";
         }
-        private static final long serialVersionUID = 0;
     }
 
     /**
@@ -149,7 +147,6 @@ public final class Matchers {
         public String toString() {
             return "Or(" + commaJoin(matchers) + ")";
         }
-        private static final long serialVersionUID = 0;
     }
 
     private static List<Matcher> asList(Matcher first, Matcher second) {
