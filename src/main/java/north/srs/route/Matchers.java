@@ -85,8 +85,8 @@ public final class Matchers {
         }
 
         @Override
-        public boolean match(HttpRequest request) {
-            return !matcher.match(request);
+        public boolean apply(HttpRequest request) {
+            return !matcher.apply(request);
         }
 
         @Override
@@ -108,9 +108,9 @@ public final class Matchers {
         }
 
         @Override
-        public boolean match(HttpRequest request) {
+        public boolean apply(HttpRequest request) {
             for (int i = 0; i < matchers.size(); i++) {
-                if (!matchers.get(i).match(request)) {
+                if (!matchers.get(i).apply(request)) {
                     return false;
                 }
             }
@@ -136,9 +136,9 @@ public final class Matchers {
         }
 
         @Override
-        public boolean match(HttpRequest request) {
+        public boolean apply(HttpRequest request) {
             for (int i = 0; i < matchers.size(); i++) {
-                if (matchers.get(i).match(request)) {
+                if (matchers.get(i).apply(request)) {
                     return true;
                 }
             }

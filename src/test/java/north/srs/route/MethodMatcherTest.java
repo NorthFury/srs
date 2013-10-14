@@ -13,7 +13,7 @@ public class MethodMatcherTest {
         MethodMatcher matcher = new MethodMatcher(HttpMethod.GET);
         DefaultHttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "");
 
-        Assert.assertEquals(true, matcher.match(request));
+        Assert.assertEquals(true, matcher.apply(request));
     }
 
     @Test
@@ -21,7 +21,7 @@ public class MethodMatcherTest {
         MethodMatcher matcher = new MethodMatcher(HttpMethod.GET);
         DefaultHttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
 
-        Assert.assertEquals(false, matcher.match(request));
+        Assert.assertEquals(false, matcher.apply(request));
     }
 
 }

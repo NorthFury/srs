@@ -16,7 +16,7 @@ public class MethodMatcher extends Matcher {
     }
 
     @Override
-    public boolean match(HttpRequest request) {
+    public boolean apply(HttpRequest request) {
         return method.equals(request.getMethod());
     }
 }
