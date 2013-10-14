@@ -173,6 +173,21 @@ public final class Matchers {
         }
 
         @Override
+        public int hashCode() {
+            // add a random number to avoid collisions with AndMatcher
+            return matchers.hashCode() + 0x053c91cf;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Matchers.AndMatcher) {
+                Matchers.AndMatcher that = (Matchers.AndMatcher) obj;
+                return matchers.equals(that.matchers);
+            }
+            return false;
+        }
+
+        @Override
         public String toString() {
             return "Or(" + commaJoin(matchers) + ")";
         }
