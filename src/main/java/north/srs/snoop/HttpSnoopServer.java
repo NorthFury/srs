@@ -1,4 +1,4 @@
-package north.srs.server;
+package north.srs.snoop;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
