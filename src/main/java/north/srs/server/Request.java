@@ -4,42 +4,38 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Request {
 
-    private HttpVersion version;
-    private HttpMethod method;
-    private String uri;
+    private final HttpVersion version;
+    private final HttpMethod method;
+    private final URI uri;
     private final HttpHeaders headers = new DefaultHttpHeaders();
 
-    public Request(HttpVersion version, HttpMethod method, String uri) {
+    public Request(HttpVersion version, HttpMethod method, URI uri) {
         this.version = version;
         this.method = method;
         this.uri = uri;
+    }
+
+    public Request(HttpVersion version, HttpMethod method, String uri) throws URISyntaxException {
+        this.version = version;
+        this.method = method;
+        this.uri = new URI(uri);
     }
 
     public HttpVersion getVersion() {
         return version;
     }
 
-    public void setVersion(HttpVersion version) {
-        this.version = version;
-    }
-
     public HttpMethod getMethod() {
         return method;
     }
 
-    public void setMethod(HttpMethod method) {
-        this.method = method;
-    }
-
-    public String getUri() {
+    public URI getUri() {
         return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
     }
 
     public HttpHeaders getHeaders() {
