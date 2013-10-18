@@ -1,9 +1,9 @@
 package north.srs.route;
 
-import io.netty.handler.codec.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import north.srs.server.Request;
 
 public final class Matchers {
 
@@ -85,7 +85,7 @@ public final class Matchers {
         }
 
         @Override
-        public boolean apply(HttpRequest request) {
+        public boolean apply(Request request) {
             return !matcher.apply(request);
         }
 
@@ -121,7 +121,7 @@ public final class Matchers {
         }
 
         @Override
-        public boolean apply(HttpRequest request) {
+        public boolean apply(Request request) {
             for (int i = 0; i < matchers.size(); i++) {
                 if (!matchers.get(i).apply(request)) {
                     return false;
@@ -163,7 +163,7 @@ public final class Matchers {
         }
 
         @Override
-        public boolean apply(HttpRequest request) {
+        public boolean apply(Request request) {
             for (int i = 0; i < matchers.size(); i++) {
                 if (matchers.get(i).apply(request)) {
                     return true;

@@ -1,7 +1,7 @@
 package north.srs.route;
 
 import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
+import north.srs.server.Request;
 
 /**
  *
@@ -16,7 +16,7 @@ public class MethodMatcher extends Matcher {
     }
 
     @Override
-    public boolean apply(HttpRequest request) {
+    public boolean apply(Request request) {
         return method.equals(request.getMethod());
     }
 

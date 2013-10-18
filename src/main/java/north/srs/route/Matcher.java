@@ -1,8 +1,8 @@
 package north.srs.route;
 
-import io.netty.handler.codec.http.HttpRequest;
+import north.srs.server.Request;
 
 public abstract class Matcher {
 
-    public abstract boolean apply(HttpRequest request);
+    public abstract boolean apply(Request request);
 }
