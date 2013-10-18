@@ -30,23 +30,21 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.EndOfDataDec
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.ErrorDataDecoderException;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.IncompatibleDataDecoderException;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import io.netty.util.CharsetUtil;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import north.srs.server.RequestBody;
 
 public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObject> {
 
     private static final Logger logger = Logger.getLogger(HttpUploadServerHandler.class.getName());
     private static final HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
 
-    private final StringBuilder responseContent = new StringBuilder();
-
     private HttpRequest request;
+    private RequestBody requestBody;
     private HttpPostRequestDecoder decoder;
 
     static {
@@ -75,6 +73,10 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
         if (msg instanceof HttpContent) {
             handleHttpContent(ctx, (HttpContent) msg);
         }
+
+        if (msg instanceof LastHttpContent) {
+            handleLastHttpContent(ctx, (LastHttpContent) msg);
+        }
     }
 
     private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
@@ -96,6 +98,9 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
                 writeResponse(ctx.channel());
             }
         }
+        if (requestBody == null) {
+            requestBody = new RequestBody();
+        }
 
         if (decoder != null) {
             try {
@@ -105,86 +110,45 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
                 ctx.channel().close();
                 return;
             }
-            // example of reading chunk by chunk (minimize memory usage due to Factory)
-            readHttpDataChunkByChunk();
-            // example of reading only if at the end
-            if (chunk instanceof LastHttpContent) {
-                writeResponse(ctx.channel());
-                reset();
-            }
+
+            readDataFromDecoder();
         }
     }
 
-    private void reset() {
-        request = null;
-
-        decoder.destroy();
-        decoder = null;
+    private void handleLastHttpContent(ChannelHandlerContext ctx, LastHttpContent lastChunk) {
+        requestBody.trailingHeaders().add(lastChunk.trailingHeaders());
+        writeResponse(ctx.channel());
+        reset();
     }
 
-    private void readHttpDataChunkByChunk() {
+    private void reset() {
+        decoder.destroy();
+        decoder = null;
+        request = null;
+        requestBody = null;
+    }
+
+    private void readDataFromDecoder() {
         try {
             while (decoder.hasNext()) {
                 InterfaceHttpData data = decoder.next();
                 if (data != null) {
-                    try {
-                        // new value
-                        writeHttpData(data);
-                    } finally {
-                        data.release();
+                    switch (data.getHttpDataType()) {
+                        case Attribute:
+                            requestBody.attributes().add((Attribute) data);
+                            break;
+                        case FileUpload:
+                            requestBody.files().add((FileUpload) data);
+                            break;
                     }
                 }
             }
         } catch (EndOfDataDecoderException e1) {
-            // end
-            responseContent.append("\r\n\r\nEND OF CONTENT CHUNK BY CHUNK\r\n\r\n");
-        }
-    }
-
-    private void writeHttpData(InterfaceHttpData data) {
-        if (data.getHttpDataType() == HttpDataType.Attribute) {
-            Attribute attribute = (Attribute) data;
-            String value;
-            try {
-                value = attribute.getValue();
-            } catch (IOException e1) {
-                responseContent.append("\r\nBODY Attribute: ").append(attribute.getHttpDataType().name()).append(": ").append(attribute.getName()).append(" Error while reading value: ").append(e1.getMessage()).append("\r\n");
-                return;
-            }
-            if (value.length() > 100) {
-                responseContent.append("\r\nBODY Attribute: ").append(attribute.getHttpDataType().name()).append(": ").append(attribute.getName()).append(" data too long\r\n");
-            } else {
-                responseContent.append("\r\nBODY Attribute: ").append(attribute.getHttpDataType().name()).append(": ").append(attribute.toString()).append("\r\n");
-            }
-        } else {
-            responseContent.append("\r\nBODY FileUpload: ").append(data.getHttpDataType().name()).append(": ").append(data.toString()).append("\r\n");
-            if (data.getHttpDataType() == HttpDataType.FileUpload) {
-                FileUpload fileUpload = (FileUpload) data;
-                if (fileUpload.isCompleted()) {
-                    if (fileUpload.length() < 10000) {
-                        responseContent.append("\tContent of file\r\n");
-                        try {
-                            responseContent.append(fileUpload.getString(fileUpload.getCharset()));
-                        } catch (IOException e1) {
-                        }
-                        responseContent.append("\r\n");
-                    } else {
-                        responseContent.append("\tFile too long to be printed out:").append(fileUpload.length()).append("\r\n");
-                    }
-//                     fileUpload.isInMemory();// tells if the file is in Memory or on File
-//                     fileUpload.renameTo(dest); // enable to move into another File dest
-//                     decoder.removeHttpDataFromClean(fileUpload); //remove the File of to delete file
-                } else {
-                    responseContent.append("\tFile to be continued but should not!\r\n");
-                }
-            }
         }
     }
 
     private void writeResponse(Channel channel) {
-        // Convert the response content to a ChannelBuffer.
-        ByteBuf buf = Unpooled.copiedBuffer(responseContent.toString(), CharsetUtil.UTF_8);
-        responseContent.setLength(0);
+        ByteBuf buf = Unpooled.copiedBuffer("Response Here", CharsetUtil.UTF_8);
 
         // Decide whether to close the connection or not.
         boolean close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(request.headers().get(HttpHeaders.Names.CONNECTION))
