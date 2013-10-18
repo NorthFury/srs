@@ -31,11 +31,14 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.ErrorDataDec
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.IncompatibleDataDecoderException;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.util.CharsetUtil;
+import java.net.URISyntaxException;
 
 import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import north.srs.route.Router;
+import north.srs.server.Request;
 import north.srs.server.RequestBody;
 
 public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObject> {
@@ -46,6 +49,8 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
     private HttpRequest request;
     private RequestBody requestBody;
     private HttpPostRequestDecoder decoder;
+    
+    private final Router router;
 
     static {
         DiskFileUpload.deleteOnExitTemporaryFile = true;
@@ -55,6 +60,10 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
         DiskAttribute.deleteOnExitTemporaryFile = true;
         // system temp directory
         DiskAttribute.baseDirectory = null;
+    }
+
+    public HttpUploadServerHandler(Router router) {
+        this.router = router;
     }
 
     @Override
@@ -82,8 +91,7 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
     private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
         this.request = request;
 
-        boolean isChunked = HttpHeaders.isTransferEncodingChunked(request);
-        boolean isMultipart = decoder.isMultipart();
+        handleRequest(ctx);
     }
 
     private void handleHttpContent(ChannelHandlerContext ctx, HttpContent chunk) throws Exception {
@@ -91,11 +99,11 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
             try {
                 decoder = new HttpPostRequestDecoder(factory, request);
             } catch (ErrorDataDecoderException e1) {
-                writeResponse(ctx.channel());
+                writeResponse(ctx.channel(), e1.getMessage());
                 ctx.channel().close();
             } catch (IncompatibleDataDecoderException e1) {
                 // GET Method: should not try to create a HttpPostRequestDecoder
-                writeResponse(ctx.channel());
+                writeResponse(ctx.channel(), e1.getMessage());
             }
         }
         if (requestBody == null) {
@@ -106,7 +114,7 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
             try {
                 decoder.offer(chunk);
             } catch (ErrorDataDecoderException e1) {
-                writeResponse(ctx.channel());
+                writeResponse(ctx.channel(), e1.getMessage());
                 ctx.channel().close();
                 return;
             }
@@ -117,13 +125,25 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
 
     private void handleLastHttpContent(ChannelHandlerContext ctx, LastHttpContent lastChunk) {
         requestBody.trailingHeaders().add(lastChunk.trailingHeaders());
-        writeResponse(ctx.channel());
+        handleRequest(ctx);
         reset();
     }
 
+    private void handleRequest(ChannelHandlerContext ctx) {
+        String response;
+        try {
+            response = router.handleRequest(new Request(request));
+        } catch (URISyntaxException ex) {
+            response = "URI exception";
+        }
+        writeResponse(ctx.channel(), response);
+    }
+
     private void reset() {
-        decoder.destroy();
-        decoder = null;
+        if (decoder != null) {
+            decoder.destroy();
+            decoder = null;
+        }
         request = null;
         requestBody = null;
     }
@@ -147,8 +167,8 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
         }
     }
 
-    private void writeResponse(Channel channel) {
-        ByteBuf buf = Unpooled.copiedBuffer("Response Here", CharsetUtil.UTF_8);
+    private void writeResponse(Channel channel, String responseText) {
+        ByteBuf buf = Unpooled.copiedBuffer(responseText, CharsetUtil.UTF_8);
 
         // Decide whether to close the connection or not.
         boolean close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(request.headers().get(HttpHeaders.Names.CONNECTION))

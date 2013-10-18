@@ -20,6 +20,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpMethod;
+import north.srs.route.Matcher;
+import north.srs.route.Matchers;
+import north.srs.route.MethodMatcher;
+import north.srs.route.Router;
 
 /**
  * A HTTP server showing how to use the HTTP multipart package for file uploads and decoding post data.
@@ -39,7 +44,7 @@ public class HttpUploadServer {
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                    .childHandler(new HttpUploadServerInitializer());
+                    .childHandler(new HttpUploadServerInitializer(createRouter()));
 
             Channel ch = b.bind(port).sync().channel();
             System.out.println("HTTP Upload Server at port " + port + '.');
@@ -50,6 +55,17 @@ public class HttpUploadServer {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
+    }
+
+    private Router createRouter() {
+        Router router = new Router();
+        Matcher matcher = Matchers.or(
+                new MethodMatcher(HttpMethod.PUT),
+                new MethodMatcher(HttpMethod.POST));
+        router.addRoute(matcher, (request) -> {
+            return "Hello";
+        });
+        return router;
     }
 
     public static void main(String[] args) throws Exception {
