@@ -1,6 +1,5 @@
 package north.srs.route;
 
-import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import java.net.URISyntaxException;
@@ -13,8 +12,7 @@ public class MethodMatcherTest {
     @Test
     public void testMatchTrue() throws URISyntaxException {
         MethodMatcher matcher = new MethodMatcher(HttpMethod.GET);
-        DefaultHttpRequest defaultRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "");
-        Request request = new Request(defaultRequest);
+        Request request = new Request(HttpVersion.HTTP_1_1, HttpMethod.GET, "");
 
         Assert.assertEquals(true, matcher.apply(request));
     }
@@ -22,8 +20,7 @@ public class MethodMatcherTest {
     @Test
     public void testMatchFalse() throws URISyntaxException {
         MethodMatcher matcher = new MethodMatcher(HttpMethod.GET);
-        DefaultHttpRequest defaultRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
-        Request request = new Request(defaultRequest);
+        Request request = new Request(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
 
         Assert.assertEquals(false, matcher.apply(request));
     }
