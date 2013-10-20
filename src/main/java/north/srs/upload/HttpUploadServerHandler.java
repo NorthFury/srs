@@ -91,7 +91,7 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
     private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
         this.request = request;
 
-        handleRequest(ctx);
+        routeRequest(ctx);
     }
 
     private void handleHttpContent(ChannelHandlerContext ctx, HttpContent chunk) throws Exception {
@@ -116,20 +116,20 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
             } catch (ErrorDataDecoderException e1) {
                 writeResponse(ctx.channel(), e1.getMessage());
                 ctx.channel().close();
-                return;
             }
-
-            readDataFromDecoder();
         }
     }
 
     private void handleLastHttpContent(ChannelHandlerContext ctx, LastHttpContent lastChunk) {
+        if (decoder != null) {
+            readDataFromDecoder();
+        }
         requestBody.trailingHeaders().add(lastChunk.trailingHeaders());
-        handleRequest(ctx);
+        routeRequest(ctx);
         reset();
     }
 
-    private void handleRequest(ChannelHandlerContext ctx) {
+    private void routeRequest(ChannelHandlerContext ctx) {
         String response;
         try {
             response = router.handleRequest(new Request(request));
