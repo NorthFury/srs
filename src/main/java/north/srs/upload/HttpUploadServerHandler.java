@@ -31,7 +31,6 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.ErrorDataDec
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.IncompatibleDataDecoderException;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.util.CharsetUtil;
-import java.net.URISyntaxException;
 
 import java.util.Collections;
 import java.util.Set;
@@ -131,11 +130,7 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
 
     private void routeRequest(ChannelHandlerContext ctx) {
         String response;
-        try {
-            response = router.handleRequest(new Request(request));
-        } catch (URISyntaxException ex) {
-            response = "URI exception";
-        }
+        response = router.handleRequest(new Request(request));
         writeResponse(ctx.channel(), response);
     }
 
