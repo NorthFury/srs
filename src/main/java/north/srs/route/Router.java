@@ -1,7 +1,7 @@
 package north.srs.route;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import north.srs.route.matcher.Matcher;
 import north.srs.server.Request;
 import north.srs.server.RequestHandler;
@@ -9,7 +9,7 @@ import north.srs.server.Response;
 
 public class Router {
 
-    private final Map<Matcher, RequestHandler> routes = new LinkedHashMap<>();
+    private final List<Route> routes = new LinkedList<>();
     private RequestHandler defaultHandler;
 
     public Router() {
@@ -24,13 +24,14 @@ public class Router {
     }
 
     public void addRoute(Matcher matcher, RequestHandler handler) {
-        routes.put(matcher, handler);
+        routes.add(new Route(matcher, handler));
     }
 
     public Response handleRequest(Request request) {
-        for (Matcher matcher : routes.keySet()) {
-            if (matcher.apply(request)) {
-                return routes.get(matcher).handle(request);
+        for (Route route : routes) {
+            Response response = route.handle(request);
+            if (response.equals(Response.BODY_REQUIRED) || !response.equals(Response.CONTINUE))  {
+                return response;
             }
         }
 
