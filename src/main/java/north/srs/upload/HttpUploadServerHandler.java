@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import north.srs.route.Router;
 import north.srs.server.Request;
 import north.srs.server.RequestBody;
+import north.srs.server.Response;
 
 public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObject> {
 
@@ -129,9 +130,8 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
     }
 
     private void routeRequest(ChannelHandlerContext ctx) {
-        String response;
-        response = router.handleRequest(new Request(request));
-        writeResponse(ctx.channel(), response);
+        Response response = router.handleRequest(new Request(request));
+        writeResponse(ctx.channel(), response.getBody());
     }
 
     private void reset() {

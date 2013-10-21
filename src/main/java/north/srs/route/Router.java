@@ -5,6 +5,7 @@ import java.util.Map;
 import north.srs.route.matcher.Matcher;
 import north.srs.server.Request;
 import north.srs.server.RequestHandler;
+import north.srs.server.Response;
 
 public class Router {
 
@@ -12,7 +13,7 @@ public class Router {
     private RequestHandler defaultHandler;
 
     public Router() {
-        defaultHandler = (Request request) -> "404";
+        defaultHandler = (Request request) -> new Response("404");
     }
 
     public void setDefaultHandler(RequestHandler defaultHandler) {
@@ -26,7 +27,7 @@ public class Router {
         routes.put(matcher, handler);
     }
 
-    public String handleRequest(Request request) {
+    public Response handleRequest(Request request) {
         for (Matcher matcher : routes.keySet()) {
             if (matcher.apply(request)) {
                 return routes.get(matcher).handle(request);
