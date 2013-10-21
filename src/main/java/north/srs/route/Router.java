@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import north.srs.route.matcher.Matcher;
 import north.srs.server.Request;
+import north.srs.server.RequestBody;
 import north.srs.server.RequestHandler;
 import north.srs.server.Response;
 
@@ -31,6 +32,17 @@ public class Router {
         for (Route route : routes) {
             Response response = route.handle(request);
             if (response.equals(Response.BODY_REQUIRED) || !response.equals(Response.CONTINUE))  {
+                return response;
+            }
+        }
+
+        return defaultHandler.handle(request);
+    }
+
+    public Response handleRequest(Request request, RequestBody requestBody) {
+        for (Route route : routes) {
+            Response response = route.handle(request);
+            if (!response.equals(Response.CONTINUE))  {
                 return response;
             }
         }
