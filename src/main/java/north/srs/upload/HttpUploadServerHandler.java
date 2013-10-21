@@ -90,6 +90,10 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
 
     private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
         this.request = request;
+        if (HttpHeaders.is100ContinueExpected(request)) {
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
+            ctx.write(response);
+        }
 
         routeRequest(ctx);
     }
