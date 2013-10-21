@@ -6,10 +6,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpMethod;
-import north.srs.route.Matcher;
-import north.srs.route.Matchers;
-import north.srs.route.MethodMatcher;
-import north.srs.route.PathMatcher;
+import north.srs.route.matcher.Matcher;
+import north.srs.route.matcher.Matchers;
+import north.srs.route.matcher.MethodMatcher;
+import north.srs.route.matcher.PathMatcher;
 import north.srs.route.Router;
 
 public class HttpUploadServer {
@@ -46,9 +46,7 @@ public class HttpUploadServer {
                 new MethodMatcher(HttpMethod.GET),
                 new PathMatcher("/hello")
         );
-        router.addRoute(matcher, (request) -> {
-            return "Hello";
-        });
+        router.addRoute(matcher, (request) -> "Hello world.");
         return router;
     }
 

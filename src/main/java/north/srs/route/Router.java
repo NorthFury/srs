@@ -2,6 +2,7 @@ package north.srs.route;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import north.srs.route.matcher.Matcher;
 import north.srs.server.Request;
 import north.srs.server.RequestHandler;
 
@@ -11,9 +12,7 @@ public class Router {
     private RequestHandler defaultHandler;
 
     public Router() {
-        defaultHandler = (Request request) -> {
-            return "404";
-        };
+        defaultHandler = (Request request) -> "404";
     }
 
     public void setDefaultHandler(RequestHandler defaultHandler) {
