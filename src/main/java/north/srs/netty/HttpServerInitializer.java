@@ -1,4 +1,4 @@
-package north.srs.upload;
+package north.srs.netty;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -8,11 +8,11 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import north.srs.route.Router;
 
-public class HttpUploadServerInitializer extends ChannelInitializer<SocketChannel> {
+public class HttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private final Router router;
 
-    public HttpUploadServerInitializer(Router router) {
+    public HttpServerInitializer(Router router) {
         this.router = router;
     }
 
@@ -31,6 +31,6 @@ public class HttpUploadServerInitializer extends ChannelInitializer<SocketChanne
 
         pipeline.addLast("deflater", new HttpContentCompressor());
 
-        pipeline.addLast("handler", new HttpUploadServerHandler(router));
+        pipeline.addLast("handler", new HttpServerHandler(router));
     }
 }

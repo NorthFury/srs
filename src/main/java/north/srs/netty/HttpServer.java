@@ -1,4 +1,4 @@
-package north.srs.upload;
+package north.srs.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -13,12 +13,12 @@ import north.srs.route.matcher.PathMatcher;
 import north.srs.route.Router;
 import north.srs.server.Response;
 
-public class HttpUploadServer {
+public class HttpServer {
 
     private final int port;
     public static boolean isSSL;
 
-    public HttpUploadServer(int port) {
+    public HttpServer(int port) {
         this.port = port;
     }
 
@@ -28,7 +28,7 @@ public class HttpUploadServer {
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                    .childHandler(new HttpUploadServerInitializer(createRouter()));
+                    .childHandler(new HttpServerInitializer(createRouter()));
 
             Channel ch = b.bind(port).sync().channel();
             System.out.println("HTTP Upload Server at port " + port + '.');
@@ -61,6 +61,6 @@ public class HttpUploadServer {
         if (args.length > 1) {
             isSSL = true;
         }
-        new HttpUploadServer(port).run();
+        new HttpServer(port).run();
     }
 }

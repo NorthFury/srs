@@ -1,4 +1,4 @@
-package north.srs.upload;
+package north.srs.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -41,9 +41,9 @@ import north.srs.server.Request;
 import north.srs.server.RequestBody;
 import north.srs.server.Response;
 
-public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObject> {
+public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
 
-    private static final Logger logger = Logger.getLogger(HttpUploadServerHandler.class.getName());
+    private static final Logger logger = Logger.getLogger(HttpServerHandler.class.getName());
     private static final HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
 
     private HttpRequest request;
@@ -62,7 +62,7 @@ public class HttpUploadServerHandler extends SimpleChannelInboundHandler<HttpObj
         DiskAttribute.baseDirectory = null;
     }
 
-    public HttpUploadServerHandler(Router router) {
+    public HttpServerHandler(Router router) {
         this.router = router;
     }
 
