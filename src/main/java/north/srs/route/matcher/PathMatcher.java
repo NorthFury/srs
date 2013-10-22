@@ -15,4 +15,17 @@ public class PathMatcher extends Matcher {
         return path.equals(request.getUri());
     }
 
+    @Override
+    public int hashCode() {
+        return path.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof PathMatcher) {
+            PathMatcher that = (PathMatcher) obj;
+            return path.equals(that.path);
+        }
+        return false;
+    }
 }
