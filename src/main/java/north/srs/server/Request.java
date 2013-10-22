@@ -49,18 +49,18 @@ public class Request {
         return uri;
     }
 
-    public HttpHeaders headers() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 
-    public Map<String, List<String>> parameters() {
+    public Map<String, List<String>> getParameters() {
         if (this.parameters == null) {
             this.parameters = new QueryStringDecoder(uri).parameters();
         }
         return parameters;
     }
 
-    public Set<Cookie> cookies() {
+    public Set<Cookie> getCookies() {
         String value = headers.get(HttpHeaders.Names.COOKIE);
         if (value == null) {
             return Collections.emptySet();
