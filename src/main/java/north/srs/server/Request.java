@@ -20,7 +20,7 @@ public class Request {
     private final String uri;
     private final HttpHeaders headers;
 
-    private final Map<String, List<String>> parameters;
+    private Map<String, List<String>> parameters;
 
     public Request(HttpRequest request) {
         this(request.getProtocolVersion(), request.getMethod(), request.getUri(), request.headers());
@@ -35,8 +35,6 @@ public class Request {
         this.method = method;
         this.uri = uri;
         this.headers = headers;
-
-        this.parameters = new QueryStringDecoder(uri).parameters();
     }
 
     public HttpVersion getVersion() {
@@ -56,6 +54,9 @@ public class Request {
     }
 
     public Map<String, List<String>> parameters() {
+        if (this.parameters == null) {
+            this.parameters = new QueryStringDecoder(uri).parameters();
+        }
         return parameters;
     }
 
