@@ -16,7 +16,6 @@ import north.srs.server.Response;
 public class HttpServer {
 
     private final int port;
-    public static boolean isSSL;
 
     public HttpServer(int port) {
         this.port = port;
@@ -57,9 +56,6 @@ public class HttpServer {
             port = Integer.parseInt(args[0]);
         } else {
             port = 8080;
-        }
-        if (args.length > 1) {
-            isSSL = true;
         }
         new HttpServer(port).run();
     }
