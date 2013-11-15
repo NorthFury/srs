@@ -14,7 +14,12 @@ public class Router {
     private RequestHandler defaultHandler;
 
     public Router() {
-        defaultHandler = (Request request) -> new Response("404");
+        defaultHandler = new RequestHandler() {
+            @Override
+            public Response handle(Request request) {
+                return new Response("404");
+            }
+        };
     }
 
     public void setDefaultHandler(RequestHandler defaultHandler) {

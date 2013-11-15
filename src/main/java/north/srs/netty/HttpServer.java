@@ -11,6 +11,8 @@ import north.srs.route.matcher.Matchers;
 import north.srs.route.matcher.MethodMatcher;
 import north.srs.route.matcher.PathMatcher;
 import north.srs.route.Router;
+import north.srs.server.Request;
+import north.srs.server.RequestHandler;
 import north.srs.server.Response;
 
 public class HttpServer {
@@ -46,7 +48,13 @@ public class HttpServer {
                 new MethodMatcher(HttpMethod.GET),
                 new PathMatcher("/hello")
         );
-        router.addRoute(matcher, (request) -> new Response("Hello world."));
+        router.addRoute(matcher, new RequestHandler() {
+            @Override
+            public Response handle(Request request) {
+                return new Response("Hello world.");
+            }
+        }
+        );
         return router;
     }
 
